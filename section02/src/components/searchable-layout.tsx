@@ -38,7 +38,7 @@ export default function SearchableLayout({
           value={search}
           onKeyDown={onKeyDown}
           onChange={onChangeSearch}
-          placeholder="검색어를 입력해주세요 ..."
+          placeholder="검색어를 입력하세요 ..."
         />
         <button onClick={onSubmit}>검색</button>
       </div>
