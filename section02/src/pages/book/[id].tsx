@@ -3,6 +3,7 @@ import Image from "next/image";
 import style from "./[id].module.css";
 import fetchOneBook from "@/lib/fetch-one-book";
 import { useRouter } from "next/router";
+import Head from "next/head";
 
 export const getStaticPaths = () => {
   return {
@@ -11,7 +12,7 @@ export const getStaticPaths = () => {
       { params: { id: "2" } },
       { params: { id: "3" } },
     ],
-    fallback: true,
+    fallback: "blocking",
     // false : 404 Notfound
     // blocking : SSR 방식
     // true : SRR 방식 + 데이터가 없는 콜백 상태의 페이지부터 반환
@@ -34,32 +35,56 @@ export default function Page({
 }: InferGetStaticPropsType<typeof getStaticProps>) {
   const router = useRouter();
 
-  if (router.isFallback) return "로딩 중입니다...";
+  if (router.isFallback) {
+    return (
+      <>
+        <Head>
+          <title>한입북스</title>
+          <meta property="og:image" content="/thumbnail.png" />
+          <meta property="og:title" content="한입북스" />
+          <meta
+            property="og:description"
+            content="한입 북스에 등록된 도서를 불러오는 중입니다."
+          />
+          {/* 최소 OG 메타만 유지 */}
+        </Head>
+        <div>로딩중입니다</div>
+      </>
+    );
+  }
 
   if (!book) return "문제가 발생하였습니다. 다시 시도하세요.";
 
   const { title, subTitle, description, author, publisher, coverImgUrl } = book;
 
   return (
-    <div className={style.container}>
-      <div
-        className={style.cover_img_container}
-        style={{ backgroundImage: `url('${coverImgUrl}')` }}
-      >
-        <Image
-          src={coverImgUrl}
-          alt={`${title} 표지`}
-          width={300}
-          height={350}
-          className={style.cover_img} // 이 스타일을 CSS에 정의하세요
-        />
+    <>
+      <Head>
+        <title>{title}</title>
+        <meta property="og:image" content={coverImgUrl} />
+        <meta property="og:title" content={title} />
+        <meta property="og:description" content={description} />
+      </Head>
+      <div className={style.container}>
+        <div
+          className={style.cover_img_container}
+          style={{ backgroundImage: `url('${coverImgUrl}')` }}
+        >
+          <Image
+            src={coverImgUrl}
+            alt={`${title} 표지`}
+            width={300}
+            height={350}
+            className={style.cover_img} // 이 스타일을 CSS에 정의하세요
+          />
+        </div>
+        <div className={style.title}>{title}</div>
+        <div className={style.subTitle}>{subTitle}</div>
+        <div className={style.author}>
+          {author} | {publisher}
+        </div>
+        <div className={style.description}>{description}</div>
       </div>
-      <div className={style.title}>{title}</div>
-      <div className={style.subTitle}>{subTitle}</div>
-      <div className={style.author}>
-        {author} | {publisher}
-      </div>
-      <div className={style.description}>{description}</div>
-    </div>
+    </>
   );
 }
